@@ -17,6 +17,9 @@ jobs:
           pkg install -y node16 npm-node16 wget curl git gcc bash gawk gsed
           wget https://dl.google.com/go/go1.22.0.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.22.0.freebsd-amd64.tar.gz && rm go1.22.0.freebsd-amd64.tar.gz
           ln -s /usr/local/go/bin/go /usr/local/bin/go
+          # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          # echo '. $HOME/.cargo/env' >> ~/.bashrc
+          # . "$HOME/.cargo/env"
         run: |
           export LATEST_APP=$(wget -qO- https://api.github.com/repos/Calcium-Ion/new-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')
           git clone -b $LATEST_APP https://github.com/Calcium-Ion/new-api
