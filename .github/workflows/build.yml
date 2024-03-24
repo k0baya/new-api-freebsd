@@ -14,7 +14,7 @@ jobs:
         usesh: true
         release: 13.2
         prepare: |
-          pkg install -y node16 npm-node16 wget curl git gcc bash gawk gsed
+          pkg install -y jq node16 npm-node16 wget curl git gcc bash gawk gsed
           wget https://dl.google.com/go/go1.22.0.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.22.0.freebsd-amd64.tar.gz && rm go1.22.0.freebsd-amd64.tar.gz
           ln -s /usr/local/go/bin/go /usr/local/bin/go
           # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
