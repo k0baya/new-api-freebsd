@@ -27,7 +27,7 @@ jobs:
           cp package.json package.json.bak && jq '.resolutions = {"rollup": "npm:@rollup/wasm-node"} | .overrides = {"rollup": "npm:@rollup/wasm-node"}' package.json.bak > package.json
           npm install
           git describe --tags > VERSION
-          REACT_APP_VERSION=$(git describe --tags) npm run build
+          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) npm run build
           cd ..
           go mod download
           go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)' -extldflags '-static'" -o new-api
