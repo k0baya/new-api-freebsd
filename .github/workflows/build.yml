@@ -24,10 +24,10 @@ jobs:
         env:
           CI: ""
         run: |
-          cd web
+          cd new-api/web
           npm install
           REACT_APP_VERSION=$(git describe --tags) npm run build
-          cd ..
+          cd ../..
 
       - name: Build Backend
         uses: vmactions/freebsd-vm@v1
