@@ -8,12 +8,12 @@ jobs:
     name: Build new-api
     steps:
     
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v3
     
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 18
+          bun-version: latest
 
       - name: Clone Repo
         run: |
@@ -25,8 +25,8 @@ jobs:
           CI: ""
         run: |
           cd new-api/web
-          npm install
-          REACT_APP_VERSION=$(git describe --tags) npm run build
+          bun install
+          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(git describe --tags) bun run build
           cd ../..
 
       - name: Build Backend
@@ -36,7 +36,7 @@ jobs:
           release: 13.2
           prepare: |
             pkg install -y jq wget curl git gcc bash gawk gsed
-            wget https://dl.google.com/go/go1.23.4.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.23.4.freebsd-amd64.tar.gz && rm go1.23.4.freebsd-amd64.tar.gz
+            wget https://dl.google.com/go/go1.24.4.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.24.4.freebsd-amd64.tar.gz && rm go1.24.4.freebsd-amd64.tar.gz
             ln -s /usr/local/go/bin/go /usr/local/bin/go
           # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           # echo '. $HOME/.cargo/env' >> ~/.bashrc
