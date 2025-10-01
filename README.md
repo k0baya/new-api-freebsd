@@ -9,7 +9,9 @@ Automatically build New-API (FreeBSD version)
 
 ### 2. 目录与文件准备
 将下载好的 `newapi` 和 `start.sh`，上传至自己网站的目标目录：  
-`/home/用户名/domains/域名/public_html
+```
+/home/用户名/domains/域名/public_html
+```
 
 
 ### 3. 设置文件权限
