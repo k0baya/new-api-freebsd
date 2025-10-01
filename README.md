@@ -1,6 +1,5 @@
 # New-API-FreeBSD
 Automatically build New-API (FreeBSD version)
-# New API 部署与使用指南
 
 ## 部署步骤
 
