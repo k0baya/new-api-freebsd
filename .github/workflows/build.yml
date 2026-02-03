@@ -42,6 +42,7 @@ jobs:
           # echo '. $HOME/.cargo/env' >> ~/.bashrc
           # . "$HOME/.cargo/env"
           run: |
+            export GOTOOLCHAIN=local
             git config --global --add safe.directory /home/runner/work/new-api-freebsd/new-api-freebsd/new-api
             cd new-api
             go mod download
