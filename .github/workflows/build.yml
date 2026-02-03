@@ -36,15 +36,15 @@ jobs:
           release: 13.2
           prepare: |
             pkg install -y jq wget curl git gcc bash gawk gsed
-            wget https://dl.google.com/go/go1.24.12.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.24.12.freebsd-amd64.tar.gz && rm go1.24.12.freebsd-amd64.tar.gz
+            wget https://dl.google.com/go/go1.25.6.freebsd-amd64.tar.gz && tar -C /usr/local -xzf go1.25.6.freebsd-amd64.tar.gz && rm go1.25.6.freebsd-amd64.tar.gz
             ln -s /usr/local/go/bin/go /usr/local/bin/go
           # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           # echo '. $HOME/.cargo/env' >> ~/.bashrc
           # . "$HOME/.cargo/env"
           run: |
-            export GOTOOLCHAIN=local
             git config --global --add safe.directory /home/runner/work/new-api-freebsd/new-api-freebsd/new-api
             cd new-api
+            gsed -i 's/stat\.Bavail \* uint64(stat\.Bsize)/uint64(stat.Bavail) * uint64(stat.Bsize)/g' controller/performance_unix.go
             go mod download
             go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)' -extldflags '-static'" -o new-api
 
