@@ -1,6 +1,13 @@
 name: Build new-api
 
-on: workflow_dispatch
+'on': workflow_dispatch
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  UPSTREAM_REPO: QuantumNous/new-api
 
 jobs:
   test:
@@ -8,26 +15,46 @@ jobs:
     name: Build new-api
     steps:
     
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
     
       - name: Set up Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
+      - name: Resolve upstream tag
+        id: upstream
+        run: |
+          tag="$(curl -fsSL "https://api.github.com/repos/${UPSTREAM_REPO}/tags?per_page=1" | python3 -c "import json,sys; data=json.load(sys.stdin); print(data[0]['name'])")"
+          if [ -z "$tag" ]; then
+            echo "::error::Failed to resolve latest upstream tag"
+            exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "Resolved upstream tag: $tag"
+
       - name: Clone Repo
         run: |
-            export LATEST_APP=$(wget -qO- https://api.github.com/repos/Calcium-Ion/new-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')
-            git clone -b $LATEST_APP https://github.com/Calcium-Ion/new-api
+          git clone --depth 1 --branch "${{ steps.upstream.outputs.tag }}" "https://github.com/${UPSTREAM_REPO}.git" new-api
 
-      - name: Build Frontend
+      - name: Build Frontend (default)
+        env:
+          CI: ""
+          NODE_OPTIONS: "--max-old-space-size=4096"
+        run: |
+          cd new-api/web/default
+          bun install
+          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION="${{ steps.upstream.outputs.tag }}" bun run build
+          cd ../../..
+
+      - name: Build Frontend (classic)
         env:
           CI: ""
         run: |
-          cd new-api/web
+          cd new-api/web/classic
           bun install
-          DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(git describe --tags) bun run build
-          cd ../..
+          VITE_REACT_APP_VERSION="${{ steps.upstream.outputs.tag }}" bun run build
+          cd ../../..
 
       - name: Build Backend
         uses: vmactions/freebsd-vm@v1
@@ -45,25 +72,21 @@ jobs:
             git config --global --add safe.directory /home/runner/work/new-api-freebsd/new-api-freebsd/new-api
             cd new-api
             go mod download
-            go build -ldflags "-s -w -X 'one-api/common.Version=$(git describe --tags)' -extldflags '-static'" -o new-api
+            go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=${{ steps.upstream.outputs.tag }}' -extldflags '-static'" -o new-api
 
       - name: Upload artifact
-        uses: actions/upload-artifact@main
+        uses: actions/upload-artifact@v4
         with:
           name: new-api-freebsd
           path: |
               new-api/new-api
   
-      - name: Generate release tag
-        id: tag
-        run: echo "release_tag=$(wget -qO- https://api.github.com/repos/Calcium-Ion/new-api/tags | gawk -F '["v]' '/name/{print "v"$5;exit}')" >> $GITHUB_OUTPUT
-
       - name: Create release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.tag.outputs.release_tag }}
+          tag_name: ${{ steps.upstream.outputs.tag }}
           files: |
                 new-api/new-api
               
